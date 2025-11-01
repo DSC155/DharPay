@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PaymentPage extends StatefulWidget {
   final String ipAddress;
-   const PaymentPage({super.key, required this.ipAddress});
+  const PaymentPage({super.key, required this.ipAddress});
+
   @override
   State<PaymentPage> createState() => _PaymentPageState();
 }
@@ -21,6 +23,13 @@ class _PaymentPageState extends State<PaymentPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
 
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _voiceInput = "";
+
+  bool isLoading = false;
+  String result = '';
+
   @override
   void initState() {
     super.initState();
@@ -31,10 +40,59 @@ class _PaymentPageState extends State<PaymentPage> {
       ip3.text = parts[2];
       ip4.text = parts[3];
     }
+    _speech = stt.SpeechToText();
   }
 
-  bool isLoading = false;
-  String result = '';
+  void _listen() async {
+    if (!_isListening) {
+      // Show Snackbar to instruct user before start listening
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please say: send/pay/transfer amount to name'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Small delay to ensure Snackbar is visible
+      await Future.delayed(const Duration(seconds: 1));
+
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('Speech status: $val'),
+        onError: (val) => print('Speech error: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _voiceInput = val.recognizedWords;
+              _processVoiceCommand(_voiceInput);
+            });
+          },
+          localeId: 'en_IN', // Adjust as needed
+          cancelOnError: true,
+          listenMode: stt.ListenMode.confirmation,
+        );
+      }
+    } else {
+      _speech.stop();
+      setState(() => _isListening = false);
+    }
+  }
+
+  void _processVoiceCommand(String command) {
+    final regex = RegExp(r'(pay|send|transfer)\s+(\d+)\s+(?:to|for)?\s+(\w+)', caseSensitive: false);
+    final match = regex.firstMatch(command);
+    if (match != null) {
+      final amount = match.group(2);
+      final username = match.group(3);
+      if (amount != null) amountController.text = amount;
+      if (username != null) usernameController.text = username;
+      print('Voice command parsed - Amount: $amount, Username: $username');
+    } else {
+      print('Voice command not recognized or does not match format');
+    }
+  }
 
   String get ipAddress =>
       "${ip1.text.trim()}.${ip2.text.trim()}.${ip3.text.trim()}.${ip4.text.trim()}";
@@ -233,7 +291,7 @@ class _PaymentPageState extends State<PaymentPage> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
+              // Header with mic button and instructions
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
@@ -259,10 +317,17 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                     ),
+                    FloatingActionButton(
+                      mini: true,
+                      backgroundColor: _isListening ? Colors.red : Colors.white,
+                      onPressed: _listen,
+                      child: Icon(_isListening ? Icons.mic : Icons.mic_none,
+                          color: _isListening ? Colors.white : Colors.black),
+                    ),
                   ],
                 ),
               ),
-              // Content Card
+              // Content card with IP, username, amount fields and submit button
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.all(20),
@@ -282,7 +347,6 @@ class _PaymentPageState extends State<PaymentPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Server IP Section
                         const Text(
                           'Server IP Address',
                           style: TextStyle(
@@ -308,14 +372,12 @@ class _PaymentPageState extends State<PaymentPage> {
                           ],
                         ),
                         const SizedBox(height: 32),
-                        // Username Field
                         _buildInputField(
                           controller: usernameController,
                           label: 'Username',
                           icon: Icons.person_outline,
                         ),
                         const SizedBox(height: 24),
-                        // Amount Field
                         _buildInputField(
                           controller: amountController,
                           label: 'Amount',
@@ -324,7 +386,6 @@ class _PaymentPageState extends State<PaymentPage> {
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         ),
                         const SizedBox(height: 32),
-                        // Submit Button
                         SizedBox(
                           width: double.infinity,
                           height: 56,
@@ -366,32 +427,23 @@ class _PaymentPageState extends State<PaymentPage> {
                             ),
                           ),
                         ),
-                        // Result Display
                         if (result.isNotEmpty)
                           ...[
                             const SizedBox(height: 24),
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: result.contains('Error')
-                                    ? Colors.red.withOpacity(0.1)
-                                    : Colors.green.withOpacity(0.1),
+                                color: result.contains('Error') ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: result.contains('Error')
-                                      ? Colors.red.withOpacity(0.3)
-                                      : Colors.green.withOpacity(0.3),
+                                  color: result.contains('Error') ? Colors.red.withOpacity(0.3) : Colors.green.withOpacity(0.3),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
-                                    result.contains('Error')
-                                        ? Icons.error_outline
-                                        : Icons.check_circle_outline,
-                                    color: result.contains('Error')
-                                        ? Colors.red
-                                        : Colors.green,
+                                    result.contains('Error') ? Icons.error_outline : Icons.check_circle_outline,
+                                    color: result.contains('Error') ? Colors.red : Colors.green,
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -399,9 +451,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                       result,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: result.contains('Error')
-                                            ? Colors.red
-                                            : Colors.green,
+                                        color: result.contains('Error') ? Colors.red : Colors.green,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),

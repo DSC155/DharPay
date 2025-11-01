@@ -1,0 +1,105 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6f8;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+header {
+    background: linear-gradient(135deg, #dc3545, #ff5f6d);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.balance-card {
+    background: rgba(255,255,255,0.2);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: right;
+}
+
+.balance-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.balance-card h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.toolbar {
+    padding: 20px 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#refreshBtn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#refreshBtn:hover {
+    background: #b02a37;
+}
+
+.table-section {
+    padding: 20px 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: #f0f0f0;
+}
+
+th, td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+tr.received td {
+    color: #28a745;
+}
+
+tr.paid td {
+    color: #dc3545;
+}
+
+tr:hover {
+    background-color: #fafafa;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}

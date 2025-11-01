@@ -5,7 +5,7 @@ import 'profile.dart';
 import 'payment_page.dart';
 import 'fingerprint_auth_page.dart'; 
 import 'recive_page.dart';
-
+import 'add_funds.dart'; // <-- Make sure this page exists!
 
 final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
@@ -14,14 +14,14 @@ class PortfolioPage extends StatefulWidget {
 
   @override
   State<PortfolioPage> createState() => _PortfolioPageState();
-  
 }
 
 class _PortfolioPageState extends State<PortfolioPage> {
-  String? connectedIp; // If null, "not connected" state.
+  String? connectedIp;
   String username = '';
+  double balance = 7630.0; // Start balance, update as needed
 
-  final transactions = [
+  final List<Map<String, dynamic>> transactions = [
     {'name': 'JoeMoe Coffee', 'method': 'Visa **** 2192', 'amount': '\$50.21', 'type': 'send'},
     {'name': 'Starbucks', 'method': 'Visa **** 2192', 'amount': '\$32.50', 'type': 'receive'},
     {'name': 'Amazon', 'method': 'Visa **** 2192', 'amount': '\$125.99', 'type': 'send'},
@@ -38,6 +38,25 @@ class _PortfolioPageState extends State<PortfolioPage> {
     if (storedUsername != null && storedUsername.isNotEmpty) {
       setState(() {
         username = storedUsername;
+      });
+    }
+  }
+
+  // --- Add Funds Navigation ---
+  Future<void> _navigateToAddFunds() async {
+    final added = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddFundsPage()),
+    );
+    if (added != null && added > 0) {
+      setState(() {
+        balance += added;
+        transactions.insert(0, {
+          'name': 'Funds Added',
+          'method': 'Balance top-up',
+          'amount': '\₹${added.toStringAsFixed(2)}',
+          'type': 'receive',
+        });
       });
     }
   }
@@ -113,7 +132,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top bar: Dashboard & Controls
+                  // Top bar (Dashboard & Controls)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -218,20 +237,20 @@ class _PortfolioPageState extends State<PortfolioPage> {
                           ),
                           borderRadius: BorderRadius.circular(23),
                         ),
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Balance",
                               style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
-                              "\$7,630",
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 38),
+                              "\₹${balance.toStringAsFixed(2)}",
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 38),
                             ),
-                            SizedBox(height: 11),
-                            Text("**** 8149", style: TextStyle(color: Colors.white, fontSize: 16, letterSpacing: 6)),
+                            const SizedBox(height: 11),
+                            const Text("**** 8149", style: TextStyle(color: Colors.white, fontSize: 16, letterSpacing: 6)),
                           ],
                         ),
                       ),
@@ -240,18 +259,12 @@ class _PortfolioPageState extends State<PortfolioPage> {
                         right: 23,
                         child: Icon(Icons.credit_card, size: 32, color: Colors.white60),
                       ),
+                      // --- Change: "+" button opens AddFundsPage! ---
                       Positioned(
                         right: 18,
                         bottom: 13,
                         child: GestureDetector(
-                          onTap: () {
-                            if (connectedIp != null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => PaymentPage(ipAddress: connectedIp!)),
-                              );
-                            }
-                          },
+                          onTap: _navigateToAddFunds,
                           child: Container(
                             width: 46,
                             height: 46,
@@ -269,115 +282,127 @@ class _PortfolioPageState extends State<PortfolioPage> {
                     ],
                   ),
                   const SizedBox(height: 28),
-                  // Action Row: Send, Receive
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 9),
-                          height: 87,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 13,
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              if (connectedIp != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => PaymentPage(ipAddress: connectedIp!)),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please connect to hotspot before sending!', textAlign: TextAlign.center),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(22),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.18),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  padding: const EdgeInsets.all(13),
-                                  child: const Icon(Icons.arrow_upward_rounded, color: Colors.green, size: 28),
-                                ),
-                                const SizedBox(height: 7),
-                                const Text('Send', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 9),
-                          height: 87,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 13,
-                              ),
-                            ],
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              if (connectedIp != null && yourUsername.isNotEmpty) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => ReceivePaymentPage(ipAddress: connectedIp!, username: yourUsername)),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please connect to hotspot before sending!', textAlign: TextAlign.center),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(22),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.18),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  padding: const EdgeInsets.all(13),
-                                  child: const Icon(Icons.arrow_downward_rounded, color: Colors.red, size: 28),
-                                ),
-                                const SizedBox(height: 7),
-                                const Text('Receive', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                 Row(
+  children: [
+    Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 9),
+        height: 87,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 13,
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () {
+            if (connectedIp != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PaymentPage(ipAddress: connectedIp!),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Please connect to hotspot before sending!',
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 28),
-                  // Transaction History
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+          borderRadius: BorderRadius.circular(22),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.all(13),
+                child: const Icon(Icons.arrow_upward_rounded,
+                    color: Colors.green, size: 28),
+              ),
+              const SizedBox(height: 7),
+              const Text('Send',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+            ],
+          ),
+        ),
+      ),
+    ),
+    Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 9),
+        height: 87,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 13,
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () {
+            if (connectedIp != null && username.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        ReceivePaymentPage(ipAddress: connectedIp!, username: username)),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Please connect to hotspot before sending!',
+                    textAlign: TextAlign.center,
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+          borderRadius: BorderRadius.circular(22),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.all(13),
+                child: const Icon(Icons.arrow_downward_rounded,
+                    color: Colors.red, size: 28),
+              ),
+              const SizedBox(height: 7),
+              const Text('Receive',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+const SizedBox(height: 28),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 18),

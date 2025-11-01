@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Access Denied</title>
+  <meta name="description" content="Access denied — you don't have permission to view this page.">
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#071025;
+      --accent1:#ff6b6b;
+      --accent2:#7c5cff;
+      --card-shadow:0 8px 30px rgba(2,6,23,0.6);
+      --radius:16px;
+      --sys:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family:var(--sys);
+      color:#e6eef8;
+      background:radial-gradient(1200px 600px at 10% 10%,rgba(124,92,255,0.12),transparent 10%),
+                 radial-gradient(900px 400px at 90% 90%,rgba(255,107,107,0.06),transparent 10%),
+                 linear-gradient(180deg,var(--bg1),var(--bg2));
+    }
+    .card{
+      background:rgba(255,255,255,0.02);
+      border-radius:var(--radius);
+      box-shadow:var(--card-shadow);
+      border:1px solid rgba(255,255,255,0.03);
+      backdrop-filter:blur(8px) saturate(110%);
+      padding:40px 50px;
+      max-width:600px;
+      text-align:center;
+    }
+    .title{
+      font-size:40px;
+      font-weight:700;
+      color:#fbfbff;
+      margin-bottom:16px;
+    }
+    .desc{
+      font-size:16px;
+      color:rgba(230,238,248,0.85);
+      margin-bottom:28px;
+    }
+    .codebox{
+      display:inline-block;
+      background:rgba(2,6,23,0.45);
+      padding:10px 16px;
+      border-radius:10px;
+      font-family:monospace;
+      font-size:13px;
+      color:#b6d0ff;
+    }
+    footer{
+      margin-top:16px;
+      font-size:13px;
+      color:rgba(230,238,248,0.6);
+    }
+    .lock{
+      margin:0 auto 28px auto;
+      width:120px;
+      height:120px;
+    }
+    .lock svg{width:100%;height:100%;filter:drop-shadow(0 10px 20px rgba(2,6,23,0.6))}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="lock">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7c5cff"/>
+            <stop offset="1" stop-color="#ff6b6b"/>
+          </linearGradient>
+        </defs>
+        <rect x="20" y="80" width="160" height="100" rx="12" fill="#0b1020" stroke="rgba(255,255,255,0.04)"/>
+        <circle cx="100" cy="130" r="10" fill="#7c5cff"/>
+        <path d="M70 80v-20a30 30 0 0 1 60 0v20" stroke="#b6d0ff" stroke-width="6" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+    <h1 class="title">Access Denied</h1>
+    <p class="desc">You don’t have permission to view this page or perform this action. If you think this is a mistake, contact the site administrator.</p>
+    <div class="codebox" id="errCode">ERR-403-0xA1B2</div>
+    <footer>Reference: <span id="ts"></span></footer>
+  </div>
+
+  <script>
+    (function(){
+      const ts=new Date();
+      const pad=n=>String(n).padStart(2,'0');
+      const fmt=ts.getFullYear()+"-"+pad(ts.getMonth()+1)+"-"+pad(ts.getDate())+" "+pad(ts.getHours())+":"+pad(ts.getMinutes())+":"+pad(ts.getSeconds());
+      document.getElementById('ts').textContent=fmt;
+      const randHex=()=>Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase().padStart(4,'0');
+      document.getElementById('errCode').textContent='ERR-403-'+randHex();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!-- history.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Transactions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style2.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💳 Pending Transactions</h1>
+            <div class="balance-card">
+                <p>Unclaimed amount</p>
+                <h2>₹ {{ uncamt }}</h2>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <button id="refreshBtn">🔁 Refresh Data</button>
+        </div>
+
+        <section class="table-section">
+            {% if records %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>From</th>
+                        <th>Amount (₹)</th>
+                        <th>To</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr class="blacktext">
+                        <td>{{ rec.readable_time }}</td>
+                        <td>{{ rec.from }}</td>
+                        <td>{{ rec.amount }}</td>
+                        <td>{{ rec.to }}</td>
+                        <td>{{ rec.ip_add }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="no-data">No transactions yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- JS File -->
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</body>
+</html>
