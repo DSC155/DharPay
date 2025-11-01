@@ -1,16 +1,35 @@
-# dharpay
+# 💸 DharPay – Smart Offline Payment App
 
-A new Flutter project.
+DharPay is a Flutter-based offline payment app designed to simplify UPI and wallet transactions.  
+It enables users to send, receive, and manage payments securely with a clean and intuitive interface.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 🔐 **User Authentication**
+  - Login with email, Username, or fingerprint.
+- 💳 **Digital Transactions**
+  - Send and receive money securely.
+- 💼 **Portfolio Management**
+  - Track your wallet balance and transaction history.
+- 💰 **Add Funds**
+  - Top-up wallet using linked accounts.
+- 📱 **Scan & Pay**
+  - QR-based instant payments.
+- 📊 **Transaction History**
+  - View all payment activity in one place.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|-------------|----------|
+| **Flutter** | Frontend mobile framework |
+| **Dart** | Application logic |
+| **Python (Flask/FastAPI)** | Backend server (for payment APIs & database) |
+| **JSON** | Local storage for transaction history |
+
+---
+
